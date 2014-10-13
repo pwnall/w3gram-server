@@ -1,0 +1,15 @@
+{
+  "name": "W3gram Server",
+  "description": "Zero setup W3gram server.",
+  "logo": "https://raw.githubusercontent.com/pwnall/w3gram-server/master/images/plane.png",
+  "website": "https://github.com/pwnall/w3gram-server",
+  "success_url": "/mak",
+  "addons": [
+    "heroku-postgresql:hobby-dev",
+    "rediscloud:25"
+  ],
+  "env": {
+    "BUILDPACK_URL": "https://github.com/heroku/heroku-buildpack-nodejs",
+    "NODE_ENV": "production"
+  }
+}
