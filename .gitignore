@@ -12,3 +12,6 @@ npm-debug.log
 
 # Node packaging output.
 webogram-server-*.tgz
+
+# Codo output.
+doc/

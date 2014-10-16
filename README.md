@@ -1,4 +1,9 @@
-# Webogram Server
+# W3gram Server
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+[![Build Status](https://travis-ci.org/pwnall/w3gram-server.svg)](https://travis-ci.org/pwnall/w3gram-server)
+[![API Documentation](http://img.shields.io/badge/API-Documentation-ff69b4.svg)](http://coffeedoc.info/github/pwnall/w3gram-server)
+[![NPM Version](http://img.shields.io/npm/v/w3gram-server.svg)](https://www.npmjs.org/package/w3gram-server)
 
 This is a [node.js](http://nodejs.org/) server for the
 [W3gram push notification protocol](Protocol.md).
@@ -10,7 +15,9 @@ coverage using [mocha](http://visionmedia.github.io/mocha/).
 
 ## Easy Setup
 
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+Click the ''Deploy to Heroku'' button at the top of this page to create your own
+W3gram server running on Heroku. Don't worry, the project only uses free
+add-ons!
 
 Get your server's MAK and store it somewhere safely.
 

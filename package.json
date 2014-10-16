@@ -1,7 +1,8 @@
 {
-  "name": "webogram-server",
+  "name": "w3gram-server",
   "version": "0.1.0",
-  "description": "Webogram Server",
+  "description": "W3gram Push Notification Server",
+  "keywords": ["push", "notifications", "w3gram"],
   "homepage": "https://github.com/pwnall/w3gram-server",
   "author": "Victor Costan <victor@costan.us> (http://www.costan.us)",
   "license": "MIT",
