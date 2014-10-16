@@ -1,5 +1,12 @@
 # Webogram Server
 
+This is a [node.js](http://nodejs.org/) server for the
+[W3gram push notification protocol](Protocol.md).
+
+The server was designed to be deployed to [Heroku](https://www.heroku.com/)
+using free resources, so it fits in a single dyno. The code has great test
+coverage using [mocha](http://visionmedia.github.io/mocha/).
+
 
 ## Easy Setup
 
@@ -53,8 +60,8 @@ curl -i -X POST -H 'Content-Type: application/json' \
 # Response example:
 # {
 #    "receiverId":"2.my-tablet.Wk3Lgc_dy0wu8smU7vHhL-Z2oDhkcF6V3Fj3O1ta2a4",
-#    "push":"http://w3gram-test.herokuapp.com/push",
-#    "listen":"ws://w3gram-test.herokuapp.com/ws/2.my-tablet.Wk3Lgc_dy0wu8smU7vHhL-Z2oDhkcF6V3Fj3O1ta2a4"
+#    "push":"https://w3gram-test.herokuapp.com/push",
+#    "listen":"wss://w3gram-test.herokuapp.com/ws/2.my-tablet.Wk3Lgc_dy0wu8smU7vHhL-Z2oDhkcF6V3Fj3O1ta2a4"
 # }
 ```
 

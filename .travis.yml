@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - "0.10"
+  - "0.11"
+addons:
+  postgresql: "9.3"
+before_script:
+  - psql -c 'create database w3gram_test;' -U postgres
+env: DATABASE_URL=postgresql://postgres@localhost/w3gram_test
