@@ -1,0 +1,5 @@
+--name "w3gram-server"
+--readme README.md
+--title "API Documentation"
+--output ./doc
+./src

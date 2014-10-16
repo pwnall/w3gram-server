@@ -1,5 +1,6 @@
 # Routes push notifications to the receivers' WebSocket connections.
 class SwitchBox
+  # Creates a switch box with no connections.
   constructor: ->
     @_hash = []
 

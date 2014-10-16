@@ -86,6 +86,11 @@ class Server
     return null unless @_address
     "ws://localhost:#{@_address.port}"
 
+  # Developer-friendly listen address.
+  #
+  # This is intended to be displayed in "Listening to ..." messages.
+  #
+  # @return {String} the listening socket's address, formatted as host:port
   listenAddress: ->
     return null unless @_address
     "#{@_address.address}:#{@_address.port}"
