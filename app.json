@@ -1,6 +1,6 @@
 {
   "name": "W3gram Server",
-  "description": "Zero setup W3gram server.",
+  "description": "W3gram push notification server",
   "logo": "https://raw.githubusercontent.com/pwnall/w3gram-server/master/images/plane.png",
   "website": "https://github.com/pwnall/w3gram-server",
   "success_url": "/mak",
