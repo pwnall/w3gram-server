@@ -40,7 +40,7 @@ class RegistrationController
 
         receiverId = app.receiverId deviceId
         pushUrl = request.protocol + '://' + request.headers['host'] + '/push'
-        response.status(200).json receiverId: receiverId, push: pushUrl
+        response.status(200).json receiver: receiverId, push: pushUrl
         return
       return
     return

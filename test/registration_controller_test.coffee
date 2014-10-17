@@ -80,7 +80,7 @@ describe 'HTTP server', ->
             'application/json; charset=utf-8')
         json = JSON.parse body
         receiverId = @app.receiverId 'tablet-device-id'
-        expect(json.receiverId).to.equal receiverId
+        expect(json.receiver).to.equal receiverId
         expect(json.push).to.equal 'http://w3gram.server.com:8080/push'
         done()
 
@@ -94,7 +94,7 @@ describe 'HTTP server', ->
             'application/json; charset=utf-8')
         json = JSON.parse body
         receiverId = @app.receiverId 'tablet-device-id'
-        expect(json.receiverId).to.equal receiverId
+        expect(json.receiver).to.equal receiverId
         expect(json.push).to.equal 'http://w3gram.server.com:8080/push'
         done()
 

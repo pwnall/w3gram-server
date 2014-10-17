@@ -25,20 +25,20 @@ Get your server's MAK and store it somewhere safely.
 curl -i https://w3gram-test.herokuapp.com/mak
 
 # Response example:
-# { "mak": "3LwwhZCuqPxO_0fNATuZbOxRgXjWuCLXzOzVaH5dZ4k" }
+# { "mak": "G-TPkmtKOczXx203po1NblklXsK5OXUylUOGkQUxRQk" }
 ```
 
 Create an application and note its API key and secret.
 
 ```bash
 curl -i -X POST -H 'Content-Type: application/json' \
-  -d '{"mak": "3LwwhZCuqPxO_0fNATuZbOxRgXjWuCLXzOzVaH5dZ4k", "app": { "name": "Testing", "origin": "*"}}' \
+  -d '{"mak": "G-TPkmtKOczXx203po1NblklXsK5OXUylUOGkQUxRQk", "app": { "name": "Testing", "origin": "*"}}' \
   https://w3gram-test.herokuapp.com/apps
 
 # Response example:
 # {
-#    "key":"MYp4g89u3OafCtZP",
-#    "secret":"z7zlLM44rFWQzmgXZX0d2r7rX9mdAP7Gg56V6YjFscY",
+#    "key":"uUJPS3zgIpQjDnxn",
+#    "secret":"7cAXyVAYEhRbQ0UFCFI4qJAWOmXLZaPC1xX6niNIxCE",
 #    "origin":"*",
 #    "name":"Testing"
 # }
@@ -50,39 +50,52 @@ Create a token for a device ID.
 
 ```bash
 echo -n "device-id|my-tablet" | \
-    openssl dgst -sha256 -hmac "z7zlLM44rFWQzmgXZX0d2r7rX9mdAP7Gg56V6YjFscY" \
+    openssl dgst -sha256 -hmac "7cAXyVAYEhRbQ0UFCFI4qJAWOmXLZaPC1xX6niNIxCE" \
     -binary | base64
 
-# Response example:
-# Xm3U6AU4qj7z5axtldHsNvhHqlsLdMRKQQbXoiFhmDU
+# Output example:
+# EVwwWmwiIfLbTDV8OWsHVc4r/p2WUpKXIJcXCdtoFxM
 ```
+
+Register the device.
+
+```bash
+curl -i -X POST -H 'Content-Type: application/json' \
+    -d '{"app": "uUJPS3zgIpQjDnxn", "device": "my-tablet", "token": "EVwwWmwiIfLbTDV8OWsHVc4r_p2WUpKXIJcXCdtoFxM"}' \
+    https://w3gram-test.herokuapp.com/register
+
+# Response example:
+# {
+#    "receiver":"1.my-tablet.WMF5TISqRYYkUr5GJWunmP40FvXI1yU_Qb5kXc907TY",
+#    "push":"https://w3gram-test.herokuapp.com/push",
+# }
+```
+
 
 Do the routing step.
 
 ```bash
 curl -i -X POST -H 'Content-Type: application/json' \
-    -d '{"app": "MYp4g89u3OafCtZP", "device": "my-tablet", "token": "Xm3U6AU4qj7z5axtldHsNvhHqlsLdMRKQQbXoiFhmDU"}' \
+    -d '{"app": "uUJPS3zgIpQjDnxn", "device": "my-tablet", "receiver": "1.my-tablet.WMF5TISqRYYkUr5GJWunmP40FvXI1yU_Qb5kXc907TY", "token": "EVwwWmwiIfLbTDV8OWsHVc4r_p2WUpKXIJcXCdtoFxM"}' \
     https://w3gram-test.herokuapp.com/route
 
 # Response example:
 # {
-#    "receiverId":"2.my-tablet.Wk3Lgc_dy0wu8smU7vHhL-Z2oDhkcF6V3Fj3O1ta2a4",
-#    "push":"https://w3gram-test.herokuapp.com/push",
-#    "listen":"wss://w3gram-test.herokuapp.com/ws/2.my-tablet.Wk3Lgc_dy0wu8smU7vHhL-Z2oDhkcF6V3Fj3O1ta2a4"
+#   "listen":"wss://w3gram-test.herokuapp.com/ws/1.my-tablet.HwVTM_07vSbHzrQHCBeHeLygUuvm5esJa2yzOjwmJwQ"
 # }
 ```
 
 Start a WebSocket connection:
 
 ```bash
-wscat -c "wss://w3gram-test.herokuapp.com/ws/2.my-tablet.Wk3Lgc_dy0wu8smU7vHhL-Z2oDhkcF6V3Fj3O1ta2a4"
+wscat -c "wss://w3gram-test.herokuapp.com/ws/1.my-tablet.HwVTM_07vSbHzrQHCBeHeLygUuvm5esJa2yzOjwmJwQ"
 ```
 
 Send a notification:
 
 ```bash
 curl -i -X POST -H 'Content-Type: application/json' \
-    -d '{"receiver": "2.my-tablet.Wk3Lgc_dy0wu8smU7vHhL-Z2oDhkcF6V3Fj3O1ta2a4", "message": { "data": "Hello push world" } }' \
+    -d '{"receiver": "1.my-tablet.WMF5TISqRYYkUr5GJWunmP40FvXI1yU_Qb5kXc907TY", "message": { "data": "Hello push world" } }' \
     https://w3gram-test.herokuapp.com/push
 ```
 
