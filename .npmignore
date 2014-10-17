@@ -1,8 +1,12 @@
 # Vim.
 *.swp
+.vimrc
 
 # OSX
 .DS_Store
+
+# Git.
+.git
 
 # Npm modules.
 /node_modules
@@ -15,3 +19,4 @@ w3gram-server-*.tgz
 
 # Auto-generated documentation.
 doc/
+

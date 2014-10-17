@@ -378,3 +378,93 @@ describe 'AppCache', ->
         expect(@mockList.findByIdCallCount).to.equal 1
         done()
 
+  describe '#decodeListenerId', ->
+    beforeEach ->
+      @app1 = new AppList.App key: 'app-key-1', id: 42, idKey: 'id-key-1'
+      @app2 = new AppList.App key: 'app-key-2', id: 5, idKey: 'id-key-2'
+      @errorObject = {error: ''}
+      @mockList.findByIdCallCount = 0
+      @mockList.findById = (id, callback) =>
+        @mockList.findByIdCallCount += 1
+        if id is 42
+          callback null, @app1
+        else if id is 5
+          callback null, @app2
+        else if id is 666
+          callback @errorObject
+        else
+          callback null, null
+        return
+
+    it 'returns null for an empty id', (done) ->
+      @cache.decodeListenerId '', (error, app, key) =>
+        expect(error).to.equal null
+        expect(app).to.equal null
+        expect(key).to.equal null
+        expect(@mockList.findByIdCallCount).to.equal 0
+        done()
+
+    it 'returns null for a mis-formatted id', (done) ->
+      @cache.decodeListenerId 'misformatted-id', (error, app, key) =>
+        expect(error).to.equal null
+        expect(app).to.equal null
+        expect(key).to.equal null
+        expect(@mockList.findByIdCallCount).to.equal 0
+        done()
+
+    it 'returns null for an incorrect HMAC', (done) ->
+      @cache.decodeListenerId '42.tablet-device-id.aaa', (error, app, key) =>
+        expect(error).to.equal null
+        expect(app).to.equal null
+        expect(key).to.equal null
+        expect(@mockList.findByIdCallCount).to.equal 1
+        done()
+
+    it 'returns null for an incorrect app id', (done) ->
+      @cache.decodeListenerId '999.tablet-device-id.aaa', (error, app, key) =>
+        expect(error).to.equal null
+        expect(app).to.equal null
+        expect(key).to.equal null
+        expect(@mockList.findByIdCallCount).to.equal 1
+        done()
+
+    it 'returns null for a poorly formatted device ID', (done) ->
+      @cache.decodeListenerId '42.tablet device id.aaa', (error, app, key) =>
+        expect(error).to.equal null
+        expect(app).to.equal null
+        expect(key).to.equal null
+        expect(@mockList.findByIdCallCount).to.equal 1
+        done()
+
+
+    it 'returns the correct app and key for a good HMAC', (done) ->
+      hmac = @app1.listenerIdHmac 'tablet-device-id'
+      listenerId = "42.tablet-device-id.#{hmac}"
+      @cache.decodeListenerId listenerId, (error, app, key) =>
+        expect(error).to.equal null
+        expect(app).to.equal @app1
+        expect(key).to.equal '42_tablet-device-id'
+        expect(@mockList.findByIdCallCount).to.equal 1
+        done()
+
+    it 'uses the app cache', (done) ->
+      @cache.decodeListenerId '42.tablet-device-id.aaa', (error, app, key) =>
+        expect(error).to.equal null
+        expect(app).to.equal null
+        expect(key).to.equal null
+        expect(@mockList.findByIdCallCount).to.equal 1
+        hmac = @app1.listenerIdHmac 'tablet-device-id'
+        listenerId = "42.tablet-device-id.#{hmac}"
+        @cache.decodeListenerId listenerId, (error, app, key) =>
+          expect(error).to.equal null
+          expect(app).to.equal @app1
+          expect(key).to.equal '42_tablet-device-id'
+          expect(@mockList.findByIdCallCount).to.equal 1
+          done()
+
+    it 'reports errors', (done) ->
+      @cache.decodeListenerId '666.tablet-device-id.aaa', (error, app, key) =>
+        expect(error).to.equal @errorObject
+        expect(@mockList.findByIdCallCount).to.equal 1
+        done()
+

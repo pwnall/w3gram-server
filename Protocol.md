@@ -6,6 +6,13 @@ notification server and a client (running in a browser) that receives
 notifications.
 
 
+## Status
+
+The W3gram protocol is currently unstable. It is guaranteed to undergo
+revisions at least until it can be used to implement the
+[W3C Push API](http://w3c.github.io/push-api/).
+
+
 ## Generic Considerations
 
 The following considerations apply to the all the following sections.
@@ -160,10 +167,7 @@ or another untrusted device) should never receive the secret.
 The receiver API is used by notification receivers, which usually run on
 untrusted devices, such as the application users' Web browsers.
 
-The protocol starts with a routing step, which affords the push notification
-server implementation an easy way to load-balance among clients.
-
-### Route a Receiver
+### Register a Device
 
 The application server must assign a unique device ID to each user device that
 requires notifications. In order to manage load, the push notification server
@@ -181,17 +185,14 @@ The token is computed using a
 `"device-id|" || device-id`, and then encoding the result using the
 [URL-safe base64 encoding in RFC 4648](http://tools.ietf.org/html/rfc4648#section-5)
 
+
 The notification server responds with a receiver ID and push URL that can be
 used by the application server to send notifications to the receiver
-application. The response also includes a WebSocket URL that the receiver
-application must connect to in order to receive the notifications.
+application.
 
 If possible, different devices for the same application should share the same
 push URL, so the application server can reuse an HTTP connection to push
 notifications to multiple devices.
-
-The WebSocket protocol has no provision for specifying the receiver's ID, so
-the WebSocket URL returned by the routing step should encode the receiver ID.
 
 If the token is missing or invalid, the notification server should use the 400
 HTTP status code. The 403 code might be more appropriate, but it triggers a
@@ -201,12 +202,12 @@ browsers as well.
 The notification server should use the
 [429 HTTP status code](http://tools.ietf.org/html/rfc6585#section-4) if the
 application has exceeded the number of devices that it is allowed to
-(simultaneouly) connect to the server.
+(simultaneouly) register to the server.
 
 Request example:
 
 ```javascript
-POST /route
+POST /register
 Content-Type: application/json
 
 {
@@ -225,7 +226,6 @@ Content-Type: application/json
 
 {
   "receiver": "backend.receiver-identifier",
-  "listen": "wss://ws.w3gram-example.com/ws/backend.receiver-identifier",
   "push": "https://push.w3gram-example.com/push/"
 }
 ```
@@ -239,6 +239,76 @@ Content-Type: application/json
 
 {
   "error": "Invalid token"
+}
+```
+
+### Route a Receiver
+
+The protocol starts with a routing step, which affords the push notification
+server implementation an easy way to load-balance among clients.
+
+The result of the routing protocol is a WebSocket URL that the receiver
+application must connect to in order to receive the notifications. The
+WebSocket protocol (defined below) has no provision for specifying receiver
+information, so the WebSocket URL returned by the routing step should encode
+the receiver's information.
+
+For security reasons, it should not be possible to compute all the receiver
+information encoded in the WebSocket URL based on the information used during
+registration (API key, device ID, receiver ID). This allows e.g., a chat
+application to pass receiver IDs among its users, without having to worry that
+a user will be able to use another user's receiver ID to listen in on the
+other user's notifications.
+
+If the token is missing or invalid, the notification server should use the 400
+HTTP status code. The 403 code might be more appropriate, but it triggers a
+CORS request bug in some versions of Safari, and may cause problems in other
+browsers as well.
+
+The notification server should use the 410 HTTP status code if the receiver ID
+does not match the current receiver ID for the device ID. This can happen if
+two clients run the registration and listening process simultaneously.
+
+The notification server should use the
+[429 HTTP status code](http://tools.ietf.org/html/rfc6585#section-4) if the
+application has exceeded the number of devices that it is allowed to
+(simultaneouly) connect to the server.
+
+Request example:
+
+```javascript
+POST /route
+Content-Type: application/json
+
+{
+  "app": "news-api-key",
+  "device": "tablet-device-id",
+  "token": "DtzV3N04Ao7eJb-H09CAk0GxgREOlOvAEAbBc4H4HAQ"
+  "receiver": "backend.receiver-identifier",
+}
+```
+
+Response example:
+
+```javascript
+200 OK
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+
+{
+  "listen": "wss://ws.w3gram-example.com/ws/backend.receiver-listener-id",
+}
+```
+
+Error example:
+
+```javascript
+410 Gone
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+
+{
+  "error": "Invalid or outdated receiver ID"
 }
 ```
 
@@ -301,21 +371,26 @@ Notification example:
 
 #### WebSocket Close Codes
 
+The WebSocket server can close the connection during the HTTP Upgrade request
+with the following codes.
+
+* 400 - the listener ID is missing or invalid
+* 403 - the Origin header does not contain an authorized origin
+* 429 - the application developer has exceeded its quota of (simultaneous)
+  device connections
+
 The WebSocket server can close the socket using one of the
 following codes.
 
-* 4403 - the WebSocket URL does not include a valid receiver ID; this code was
-  chosen as an alias for HTTP 403 in the user-defined WebSockets close code
-  range (4000-4999)
-* 4429 - the application developer has exceeded its quota of (simultaneous)
-  device connections
+* 4410 - the push server has received another connection using the same device
+  ID
 * 4400 - the receiver sent a malformed (non-JSON) request, or the request was
   too large
 * 4404 - the receiver sent a request that was not understood by the server
 * 1001 - the WebSocket server is shutting down; the receiver should try
   re-connecting to the same WebSocket URL, using exponential backoff
 
-Upon receiving a 4403, 4400, or 4404 code, the receiver should not attempt to
+Upon receiving a 4410, 4400, or 4404 code, the receiver should not attempt to
 re-connect to the server.
 
 

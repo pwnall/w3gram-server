@@ -6,6 +6,7 @@ ws = require 'ws'
 
 AppsController = require './apps_controller.coffee'
 PushController = require './push_controller.coffee'
+RegistrationController = require './registration_controller.coffee'
 RoutingController = require './routing_controller.coffee'
 
 # Ties together all the controllers.
@@ -33,6 +34,7 @@ class Server
     # The controllers are ordered by the expected relative frequency of
     # received requests.
     new PushController @_app, appCache, switchBox
+    new RegistrationController @_app, appCache
     new RoutingController @_app, appCache
     new AppsController @_app, appList, appCache
 

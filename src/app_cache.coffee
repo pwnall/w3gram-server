@@ -117,11 +117,32 @@ class AppCache
       if app is null or app.receiverIdHmac(deviceId) isnt hmac
         callback null, null, null
       else
-        # NOTE: the main concern here is making sure that different apps can't
-        #       generate colliding keys; suffixing the app's database ID with
-        #       any non-numeric character ensures that no app's prefix (id +
-        #       character) is the prefix of another app's prefix,
-        callback null, app, "#{id}_#{deviceId}"
+        callback null, app, app.hashKey(deviceId)
+      return
+    return
+
+  # Decodes a listener ID and returns a hash key used to identify the listener.
+  #
+  # @param {String} listenerId the listener ID to be decoded
+  # @callback {function(Error, AppList.App, String)} callback called with the
+  #   app that issued the listener ID, and a hash key; the app and the key are
+  #   null if the listener ID is invalid (e.g., the HMAC doesn't match)
+  # @return undefined
+  decodeListenerId: (listenerId, callback) ->
+    components = listenerId.split '.'
+    unless components.length is 3
+      callback null, null, null
+      return
+    [idString, deviceId, hmac] = components
+    id = parseInt idString
+    @getAppById id, (error, app) =>
+      if error isnt null
+        callback error
+        return
+      if app is null or app.listenerIdHmac(deviceId) isnt hmac
+        callback null, null, null
+      else
+        callback null, app, app.hashKey(deviceId)
       return
     return
 

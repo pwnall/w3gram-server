@@ -73,7 +73,7 @@ describe 'App', ->
 
   describe '#token', ->
     it 'returns null for invalid device IDs', ->
-      expect(@app.token('invalid token')).to.equal null
+      expect(@app.token('invalid device')).to.equal null
 
     it 'works on the documentation example', ->
       expect(@app.token('tablet-device-id')).to.equal(
@@ -81,18 +81,61 @@ describe 'App', ->
 
   describe '#receiverIdHmac', ->
     it 'returns null for invalid device IDs', ->
-      expect(@app.receiverIdHmac('invalid token')).to.equal null
+      expect(@app.receiverIdHmac('invalid device')).to.equal null
 
     it 'works on the documentation example', ->
-      hmac = App._hmac 'news-app-id-key', 'receiver-id|42|tablet-device-id'
+      hmac = App._hmac 'news-app-id-key',
+                       'signed-id|receiver|42|tablet-device-id'
       expect(@app.receiverIdHmac('tablet-device-id')).to.equal hmac
 
   describe '#receiverId', ->
     it 'returns null for invalid device IDs', ->
-      expect(@app.receiverId('invalid token')).to.equal null
+      expect(@app.receiverId('invalid device')).to.equal null
 
     it 'works on the documentation example', ->
-      hmac = App._hmac 'news-app-id-key', 'receiver-id|42|tablet-device-id'
+      hmac = App._hmac 'news-app-id-key',
+                       'signed-id|receiver|42|tablet-device-id'
       expect(@app.receiverId('tablet-device-id')).to.equal(
           "42.tablet-device-id.#{hmac}")
 
+  describe '#listenerIdHmac', ->
+    it 'returns null for invalid device IDs', ->
+      expect(@app.listenerIdHmac('invalid device')).to.equal null
+
+    it 'works on the documentation example', ->
+      hmac = App._hmac 'news-app-id-key',
+                       'signed-id|listener|42|tablet-device-id'
+      expect(@app.listenerIdHmac('tablet-device-id')).to.equal hmac
+
+  describe '#listenerId', ->
+    it 'returns null for invalid device IDs', ->
+      expect(@app.listenerId('invalid device')).to.equal null
+
+    it 'works on the documentation example', ->
+      hmac = App._hmac 'news-app-id-key',
+                       'signed-id|listener|42|tablet-device-id'
+      expect(@app.listenerId('tablet-device-id')).to.equal(
+          "42.tablet-device-id.#{hmac}")
+
+  describe '#hashKey', ->
+    it 'returns null for invalid device IDs', ->
+      expect(@app.hashKey('invalid device')).to.equal null
+
+    it 'works on the documentation example', ->
+      expect(@app.hashKey('tablet-device-id')).to.equal '42_tablet-device-id'
+
+  describe '#json', ->
+    it 'includes the public fields', ->
+      json = @app.json()
+      expect(json).to.be.an 'object'
+      expect(json.key).to.equal @app.key
+      expect(json.secret).to.equal @app.secret
+      expect(json.origin).to.equal @app.origin
+      expect(json.name).to.equal @app.name
+
+    it 'does not include the ID key', ->
+      json = @app.json()
+      expect(json).to.be.an 'object'
+      expect(json).not.to.have.property 'idKey'
+      for property of json
+        expect(json[property]).not.to.equal @app.idKey

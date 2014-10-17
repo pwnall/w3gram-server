@@ -36,10 +36,10 @@ describe 'HTTP server', ->
         process.exit 1
       done()
 
-  describe 'OPTIONS /route', ->
+  describe 'OPTIONS /register', ->
     it 'returns a CORS-compliant response', (done) ->
       requestOptions =
-        url: "#{@httpRoot}/route"
+        url: "#{@httpRoot}/register"
         method: 'OPTIONS'
         headers:
           origin: 'https://example.push.consumer.com'
@@ -53,7 +53,7 @@ describe 'HTTP server', ->
           '31536000')
         done()
 
-  describe 'POST /route', ->
+  describe 'POST /register', ->
     beforeEach (done) ->
       appOptions =
         name: 'routing test app', origin: 'https://test.app.com'
@@ -61,18 +61,17 @@ describe 'HTTP server', ->
         expect(error).to.equal null
         @app = app
         @postOptions =
-          url: "#{@httpRoot}/route"
+          url: "#{@httpRoot}/register"
           headers:
             'content-type': 'application/json; charset=utf-8'
             'host': 'w3gram.server.com:8080'
           body: JSON.stringify(
             app: @app.key
             device: 'tablet-device-id'
-            receiver: @app.receiverId('tablet-device-id')
             token: @app.token('tablet-device-id'))
         done()
 
-    it 'processes a correct routing request', (done) ->
+    it 'processes a correct registration', (done) ->
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 200
@@ -80,12 +79,12 @@ describe 'HTTP server', ->
         expect(response.headers['content-type']).to.equal(
             'application/json; charset=utf-8')
         json = JSON.parse body
-        listenerId = @app.listenerId 'tablet-device-id'
-        expect(json.listen).to.equal(
-            "ws://w3gram.server.com:8080/ws/#{listenerId}")
+        receiverId = @app.receiverId 'tablet-device-id'
+        expect(json.receiverId).to.equal receiverId
+        expect(json.push).to.equal 'http://w3gram.server.com:8080/push'
         done()
 
-    it 'processes a correct CORS routing request', (done) ->
+    it 'processes a correct CORS registration', (done) ->
       @postOptions.headers['origin'] = 'https://test.app.com'
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
@@ -94,12 +93,12 @@ describe 'HTTP server', ->
         expect(response.headers['content-type']).to.equal(
             'application/json; charset=utf-8')
         json = JSON.parse body
-        listenerId = @app.listenerId 'tablet-device-id'
-        expect(json.listen).to.equal(
-            "ws://w3gram.server.com:8080/ws/#{listenerId}")
+        receiverId = @app.receiverId 'tablet-device-id'
+        expect(json.receiverId).to.equal receiverId
+        expect(json.push).to.equal 'http://w3gram.server.com:8080/push'
         done()
 
-    it 'rejects a CORS routing request from an unauthorized origin', (done) ->
+    it 'rejects a CORS registration from an unauthorized origin', (done) ->
       @postOptions.headers['origin'] = 'https://hax.app.com'
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
@@ -111,11 +110,9 @@ describe 'HTTP server', ->
         expect(json.error).to.equal 'Unauthorized origin'
         done()
 
-    it 'rejects a routing request missing the API key', (done) ->
+    it 'rejects a registration missing the API key', (done) ->
       @postOptions.body = JSON.stringify(
-          device: 'tablet-device-id'
-          receiver: @app.receiverId('tablet-device-id')
-          token: @app.token('tablet-device-id'))
+          device: 'tablet-device-id', token: @app.token('tablet-device-id'))
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 400
@@ -126,11 +123,9 @@ describe 'HTTP server', ->
         expect(json.error).to.equal 'Missing API key'
         done()
 
-    it 'rejects a routing request missing the device ID', (done) ->
+    it 'rejects a registration missing the device ID', (done) ->
       @postOptions.body = JSON.stringify(
-          app: @app.key
-          receiver: @app.receiverId('tablet-device-id')
-          token: @app.token('tablet-device-id'))
+          app: @app.key, token: @app.token('tablet-device-id'))
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 400
@@ -141,26 +136,9 @@ describe 'HTTP server', ->
         expect(json.error).to.equal 'Missing device ID'
         done()
 
-    it 'rejects a routing request missing the receiver ID', (done) ->
+    it 'rejects a registration missing the token', (done) ->
       @postOptions.body = JSON.stringify(
-          app: @app.key
-          device: 'tablet-device-id'
-          token: @app.token('tablet-device-id'))
-      request.post @postOptions, (error, response, body) =>
-        expect(error).not.to.be.ok
-        expect(response.statusCode).to.equal 400
-        expect(response.headers['access-control-allow-origin']).to.equal '*'
-        expect(response.headers['content-type']).to.equal(
-            'application/json; charset=utf-8')
-        json = JSON.parse body
-        expect(json.error).to.equal 'Missing receiver ID'
-        done()
-
-    it 'rejects a routing request missing the token', (done) ->
-      @postOptions.body = JSON.stringify(
-          app: @app.key
-          device: 'tablet-device-id'
-          receiver: @app.receiverId('tablet-device-id'))
+          app: @app.key, device: 'tablet-device-id')
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 400
@@ -171,11 +149,10 @@ describe 'HTTP server', ->
         expect(json.error).to.equal 'Missing token'
         done()
 
-    it 'rejects a routing request with an invalid API key', (done) ->
+    it 'rejects a registration with an invalid API key', (done) ->
       @postOptions.body = JSON.stringify(
             app: @app.key + '-but-not-really'
             device: 'tablet-device-id'
-            receiver: @app.receiverId('tablet-device-id')
             token: @app.token('tablet-device-id'))
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
@@ -187,11 +164,10 @@ describe 'HTTP server', ->
         expect(json.error).to.equal 'Invalid API key'
         done()
 
-    it 'rejects a routing request with an invalid token', (done) ->
+    it 'rejects a registration with an invalid token', (done) ->
       @postOptions.body = JSON.stringify(
             app: @app.key
             device: 'tablet-device-id'
-            receiver: @app.receiverId('tablet-device-id')
             token: @app.token('tablet-device-id') + '-but-not-really')
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
@@ -203,21 +179,6 @@ describe 'HTTP server', ->
         expect(json.error).to.equal 'Invalid token'
         done()
 
-    it 'rejects a routing request with an invalid receiver ID', (done) ->
-      @postOptions.body = JSON.stringify(
-            app: @app.key
-            device: 'tablet-device-id'
-            receiver: @app.receiverId('tablet-device-id') + '-but-not-really'
-            token: @app.token('tablet-device-id'))
-      request.post @postOptions, (error, response, body) =>
-        expect(error).not.to.be.ok
-        expect(response.statusCode).to.equal 410
-        expect(response.headers['access-control-allow-origin']).to.equal '*'
-        expect(response.headers['content-type']).to.equal(
-            'application/json; charset=utf-8')
-        json = JSON.parse body
-        expect(json.error).to.equal 'Invalid or outdated receiver ID'
-        done()
 
     it '500s on AppCachge#getAppByKey errors', (done) ->
       @sandbox.stub(@appCache, 'getAppByKey').callsArgWith 1, new Error()
@@ -230,5 +191,6 @@ describe 'HTTP server', ->
         json = JSON.parse body
         expect(json.error).to.equal 'Database error'
         done()
+
 
 

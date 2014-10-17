@@ -7,7 +7,8 @@ class AppList.App
   # @param {Object} fields initial values
   # @option fields {Number} id private ID, primary key
   # @option fields {String} key public application ID
-  # @option fields {String{ idKey HMAC key used by receiver IDs
+  # @option fields {String} idKey HMAC key used by receiver IDs and listener
+  #   IDs; this should not be revealed to the application developer
   # @option fields {String} secret token used to authenticate app requests to
   #   the API
   # @option fields {String} origin allowed CORS Origin header value
@@ -41,9 +42,9 @@ class AppList.App
     return null unless AppList.App.isValidDeviceId deviceId
     AppList.App._hmac @secret, "device-id|#{deviceId}"
 
-  # Creates a receiver ID for a device ID.
+  # Computes the receiver ID for a device ID.
   #
-  # @param {String} deviceId the device ID to create a receiver ID for
+  # @param {String} deviceId the device ID embedded in the receiver ID
   # @return {String} the receiver ID, or null if the argument is an invalid
   #   device ID
   receiverId: (deviceId) ->
@@ -53,12 +54,44 @@ class AppList.App
 
   # The HMAC included in a receiver ID.
   #
-  # @param {String} deviceId the device ID that the receiver ID is used for
+  # @param {String} deviceId the device ID embedded in the receiver ID
   # @return {String} the HMAC in the receiver ID, or null if the argument is an
   #   invalid device ID
   receiverIdHmac: (deviceId) ->
     return null unless AppList.App.isValidDeviceId deviceId
-    AppList.App._hmac @idKey, "receiver-id|#{@id}|#{deviceId}"
+    AppList.App._hmac @idKey, "signed-id|receiver|#{@id}|#{deviceId}"
+
+  # Computes a listener ID for a device ID.
+  #
+  # @param {String} deviceId the device ID embedded in the listener ID
+  # @return {String} the listener ID, or null if the argument is an invalid
+  #   device ID
+  listenerId: (deviceId) ->
+    return null unless AppList.App.isValidDeviceId deviceId
+    hmac = @listenerIdHmac deviceId
+    "#{@id}.#{deviceId}.#{hmac}"
+
+  # The HMAC included in a listener ID.
+  #
+  # @param {String} deviceId the device ID embedded in the listener ID
+  # @return {String} the HMAC in the listener ID, or null if the argument is an
+  #   invalid device ID
+  listenerIdHmac: (deviceId) ->
+    return null unless AppList.App.isValidDeviceId deviceId
+    AppList.App._hmac @idKey, "signed-id|listener|#{@id}|#{deviceId}"
+
+  # The switch box hash key used for a device ID.
+  #
+  # @param {String} deviceId the device ID represented by the hash key
+  # @return {String} a hash key that can be used to route push notifications to
+  #   the given device ID using a switch box
+  hashKey: (deviceId) ->
+    return null unless AppList.App.isValidDeviceId deviceId
+    # NOTE: the main concern here is making sure that different apps can't
+    #       generate colliding keys; suffixing the app's database ID with any
+    #       non-numeric character ensures that no app's prefix (id + character)
+    #       is the prefix of another app's prefix
+    "#{@id}_#{deviceId}"
 
   # Checks if a string is a valid device ID.
   #

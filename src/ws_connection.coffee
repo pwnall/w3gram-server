@@ -41,8 +41,8 @@ class Server.WsConnection
     unless url.substring(0, 4) is '/ws/'
       callback false, 400
       return
-    receiverId = url.substring 4
-    appCache.decodeReceiverId receiverId, (error, app, hashKey) ->
+    listenerId = url.substring 4
+    appCache.decodeListenerId listenerId, (error, app, hashKey) ->
       if error
         callback false, 500
         return
@@ -71,7 +71,7 @@ class Server.WsConnection
     return
 
   # @return {String} the hash key for the connection's receiver, as produced by
-  #   {AppCache#decodeReceiverId}
+  #   {AppCache#decodeListenerId}
   hashKey: ->
     @_hashKey
 

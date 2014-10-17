@@ -31,8 +31,9 @@ describe 'WebSockets server', ->
       @appList.create appOptions, (error, app) =>
         expect(error).to.equal null
         @app = app
+        @listenerId = app.listenerId 'tablet-device-id'
         @receiverId = app.receiverId 'tablet-device-id'
-        @wsUrl = "#{@server.wsUrl()}/ws/#{@receiverId}"
+        @wsUrl = "#{@server.wsUrl()}/ws/#{@listenerId}"
         @wsHeaders = { origin: 'https://test.app.com' }
         done()
 
@@ -65,7 +66,7 @@ describe 'WebSockets server', ->
       ws.close()
       done()
 
-  it '400s a connection without a receiver ID', (done) ->
+  it '400s a connection without a listener ID', (done) ->
     ws = new WebSocket "#{@server.wsUrl()}/ws"
     ws.on 'open', ->
       expect('Server should not accept connection').to.equal false
@@ -76,8 +77,8 @@ describe 'WebSockets server', ->
       ws.close()
       done()
 
-  it '400s a connection with an invalid receiver ID', (done) ->
-    ws = new WebSocket "#{@server.wsUrl()}/ws/42.invalid.receiver-id"
+  it '400s a connection with an invalid listener ID', (done) ->
+    ws = new WebSocket "#{@server.wsUrl()}/ws/42.invalid.listener-id"
     ws.on 'open', ->
       expect('Server should not accept connection').to.equal false
       done()
