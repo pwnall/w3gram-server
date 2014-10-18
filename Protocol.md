@@ -324,6 +324,22 @@ routing step.
 The server and client exchange JSON-encoded WebSocket text frames. The `type`
 key in the JSON object indicates the request type.
 
+#### WebSocket Open
+
+The
+[WebSocket open event](http://dev.w3.org/html5/websockets/#handler-websocket-onopen)
+does not work properly cross-browser. When a receiver connects via a WebSocket,
+the W3gram server immediately sends a `hi` message. Clients can use this
+instead of having to rely on the `open` event.
+
+Open example:
+
+```json
+{
+  "type": "hi",
+  "data": { "version": 0 }
+}
+```
 
 #### WebSocket Keep-Alive
 

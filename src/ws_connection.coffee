@@ -25,6 +25,7 @@ class Server.WsConnection
     webSocket.on 'error', @_onWsError.bind(@)
     webSocket.on 'close', @_onWsClose.bind(@)
     @_switchBox.addConnection @
+    @_ws.send JSON.stringify(type: 'hi', data: { version: 0 })
 
     return
 
