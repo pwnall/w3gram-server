@@ -46,10 +46,10 @@ class RoutingController
           return
 
         listenerId = app.listenerId deviceId
-        pushUrl = request.protocol + '://' + request.headers['host'] + '/push'
+        host = request.headers['host']
+        pushUrl = request.protocol + '://' + host + '/push'
         wsProtocol = if request.secure then 'wss' else 'ws'
-        wsUrl = wsProtocol + '://' + request.headers['host'] + '/ws/' +
-            listenerId
+        wsUrl = wsProtocol + '://' + host + '/ws/' + listenerId
         response.status(200).json listen: wsUrl
         return
       return
