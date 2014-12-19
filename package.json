@@ -14,7 +14,7 @@
     "url": "https://github.com/pwnall/w3gram-server/issues"
   },
   "engines": {
-    "node": ">= 0.10.34"
+    "node": ">= 0.10.33"
   },
   "dependencies": {
     "any-db": ">= 2.1.0",
