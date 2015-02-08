@@ -14,7 +14,8 @@
     "url": "https://github.com/pwnall/w3gram-server/issues"
   },
   "engines": {
-    "node": "0.10.x"
+    "iojs": "1.x",
+    "node": "0.12.x"
   },
   "dependencies": {
     "any-db": ">= 2.1.0",
@@ -23,7 +24,7 @@
     "body-parser": ">= 1.11.0",
     "coffee-script": ">= 1.9.0",
     "cors": ">= 2.5.3",
-    "express": ">= 4.10.6",
+    "express": ">= 4.11.2",
     "nodetime": ">= 0.8.15",
     "pg": ">= 4.2.0",
     "ws": ">= 0.7.1"
