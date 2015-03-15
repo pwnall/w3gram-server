@@ -10,7 +10,6 @@
     "logentries:tryit",
     "nodetime:free",
     "papertrail:choklad",
-    "pgbackups:auto-month",
     "rediscloud:25"
   ],
   "env": {
