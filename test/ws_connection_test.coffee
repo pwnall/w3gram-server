@@ -224,11 +224,10 @@ describe 'WebSockets server', ->
       expect(json.data.version).to.equal 0
 
       postOptions =
-        url: "#{@httpRoot}/push"
+        url: "#{@httpRoot}/push/#{@receiverId}"
         headers:
           'content-type': 'application/json; charset=utf-8'
         body: JSON.stringify(
-          receiver: @receiverId
           message: { text: 'This is a push notification' })
       request.post postOptions, (error, response, body) =>
         expect(error).not.to.be.ok

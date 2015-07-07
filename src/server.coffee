@@ -26,7 +26,10 @@ class Server
     @_switchBox = switchBox
 
     @_app = express()
+    @_app.enable 'case sensitive routing'
+    @_app.enable 'strict routing'
     @_app.enable 'trust proxy'
+    @_app.disable 'x-powered-by'
     @_app.use cors methods: ['POST'], maxAge: 31536000
     @_app.use bodyParser.json(
         strict: true, type: 'application/json', limit: 65536)

@@ -186,13 +186,13 @@ The token is computed using a
 [URL-safe base64 encoding in RFC 4648](http://tools.ietf.org/html/rfc4648#section-5)
 
 
-The notification server responds with a receiver ID and push URL that can be
-used by the application server to send notifications to the receiver
-application.
+The notification server responds with a push URL that can be used by the
+application server to send notifications to the receiver application, and with
+the routing URL to be used by the listener.
 
-If possible, different devices for the same application should share the same
-push URL, so the application server can reuse an HTTP connection to push
-notifications to multiple devices.
+If possible, the push URLs for different devices for the same application
+should have the same origin (protocol, host and port), so the application
+server can reuse an HTTP connection to push notifications to multiple devices.
 
 If the token is missing or invalid, the notification server should use the 400
 HTTP status code. The 403 code might be more appropriate, but it triggers a
@@ -225,8 +225,8 @@ Access-Control-Allow-Origin: *
 Content-Type: application/json
 
 {
-  "receiver": "backend.receiver-identifier",
-  "push": "https://push.w3gram-example.com/push/"
+  "route": "https://push.w3gram-example.com/route/backend.listener-identifier",
+  "push": "https://push.w3gram-example.com/push/backend.receiver-identifier"
 }
 ```
 
@@ -244,8 +244,9 @@ Content-Type: application/json
 
 ### Route a Receiver
 
-The protocol starts with a routing step, which affords the push notification
-server implementation an easy way to load-balance among clients.
+The notification receiving protocol starts with a routing step, which affords
+the push notification server implementation an easy way to load-balance among
+clients.
 
 The result of the routing protocol is a WebSocket URL that the receiver
 application must connect to in order to receive the notifications. The
@@ -253,21 +254,16 @@ WebSocket protocol (defined below) has no provision for specifying receiver
 information, so the WebSocket URL returned by the routing step should encode
 the receiver's information.
 
-For security reasons, it should not be possible to compute all the receiver
-information encoded in the WebSocket URL based on the information used during
-registration (API key, device ID, receiver ID). This allows e.g., a chat
+For security reasons, it should not be possible to compute the WebSocket URL
+based on the API key and the device's push URL. This allows e.g., a chat
 application to pass receiver IDs among its users, without having to worry that
 a user will be able to use another user's receiver ID to listen in on the
 other user's notifications.
 
-If the token is missing or invalid, the notification server should use the 400
-HTTP status code. The 403 code might be more appropriate, but it triggers a
-CORS request bug in some versions of Safari, and may cause problems in other
-browsers as well.
-
-The notification server should use the 410 HTTP status code if the receiver ID
-does not match the current receiver ID for the device ID. This can happen if
-two clients run the registration and listening process simultaneously.
+If the identifier in the routing URL is missing or invalid, the notification
+server should use the 400 HTTP status code. The 403 code might be more
+appropriate, but it triggers a CORS request bug in some versions of Safari, and
+may cause problems in other browsers as well.
 
 The notification server should use the
 [429 HTTP status code](http://tools.ietf.org/html/rfc6585#section-4) if the
@@ -277,15 +273,10 @@ application has exceeded the number of devices that it is allowed to
 Request example:
 
 ```javascript
-POST /route
+POST /route/backend.listener-identifier
 Content-Type: application/json
 
-{
-  "app": "news-api-key",
-  "device": "tablet-device-id",
-  "token": "DtzV3N04Ao7eJb-H09CAk0GxgREOlOvAEAbBc4H4HAQ"
-  "receiver": "backend.receiver-identifier",
-}
+{}
 ```
 
 Response example:
@@ -437,7 +428,6 @@ POST /push-url-obtained-from-routing
 Content-Type: application/json
 
 {
-  "receiver": "backend.receiver-identifier",
   "message": { "text": "Hello push world!" }
 }
 ```

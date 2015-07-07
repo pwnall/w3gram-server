@@ -37,10 +37,19 @@ describe 'HTTP server', ->
         process.exit 1
       done()
 
+  beforeEach (done) ->
+    appOptions =
+      name: 'push test app', origin: 'https://test.app.com'
+    @appList.create appOptions, (error, app) =>
+      expect(error).to.equal null
+      @app = app
+      done()
+
+
   describe 'OPTIONS /push', ->
     it 'returns a CORS-compliant response', (done) ->
       requestOptions =
-        url: "#{@httpRoot}/push"
+        url: "#{@httpRoot}/push/#{@app.receiverId('tablet-device-id')}"
         method: 'OPTIONS'
         headers:
           origin: 'https://example.push.consumer.com'
@@ -55,20 +64,13 @@ describe 'HTTP server', ->
         done()
 
   describe 'POST /push', ->
-    beforeEach (done) ->
-      appOptions =
-        name: 'push test app', origin: 'https://test.app.com'
-      @appList.create appOptions, (error, app) =>
-        expect(error).to.equal null
-        @app = app
-        @postOptions =
-          url: "#{@httpRoot}/push"
-          headers:
-            'content-type': 'application/json; charset=utf-8'
-          body: JSON.stringify(
-            receiver: @app.receiverId('tablet-device-id')
-            message: { text: 'This is a push notification' })
-        done()
+    beforeEach ->
+      @postOptions =
+        url: "#{@httpRoot}/push/#{@app.receiverId('tablet-device-id')}"
+        headers:
+          'content-type': 'application/json; charset=utf-8'
+        body: JSON.stringify(
+          message: { text: 'This is a push notification' })
 
     it 'accepts a correct push request', (done) ->
       pushNotificationSpy = @sandbox.spy @switchBox, 'pushNotification'
@@ -106,21 +108,15 @@ describe 'HTTP server', ->
         done()
 
     it 'rejects a push request missing the receiver ID', (done) ->
-      @postOptions.body = JSON.stringify(
-          message: { text: 'This is a push notification' })
+      @postOptions.url = "#{@httpRoot}/push/"
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
-        expect(response.statusCode).to.equal 400
+        expect(response.statusCode).to.equal 404
         expect(response.headers['access-control-allow-origin']).to.equal '*'
-        expect(response.headers['content-type']).to.equal(
-            'application/json; charset=utf-8')
-        json = JSON.parse body
-        expect(json.error).to.equal 'Missing receiver ID'
         done()
 
     it 'rejects a push request missing the message', (done) ->
-      @postOptions.body = JSON.stringify(
-          receiver: @app.receiverId('tablet-device-id'))
+      @postOptions.body = JSON.stringify({})
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 400
@@ -132,9 +128,7 @@ describe 'HTTP server', ->
         done()
 
     it 'rejects a push request with an invalid receiver ID', (done) ->
-      @postOptions.body = JSON.stringify(
-            receiver: 'invalid.receiver'
-            message: { text: 'This is a push notification' })
+      @postOptions.url = "#{@httpRoot}/push/invalid.receiver"
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 400

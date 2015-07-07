@@ -15,8 +15,8 @@ coverage using [mocha](http://visionmedia.github.io/mocha/).
 
 ## Easy Setup
 
-Click the ''Deploy to Heroku'' button at the top of this page to create your own
-W3gram server running on Heroku. Don't worry, the project only uses free
+Click the ''Deploy to Heroku'' button at the top of this page to create your
+own W3gram server running on Heroku. Don't worry, the project only uses free
 add-ons!
 
 Get your server's MAK and store it somewhere safely.
@@ -66,8 +66,8 @@ curl -i -X POST -H 'Content-Type: application/json' \
 
 # Response example:
 # {
-#    "receiver":"1.my-tablet.WMF5TISqRYYkUr5GJWunmP40FvXI1yU_Qb5kXc907TY",
-#    "push":"https://w3gram-test.herokuapp.com/push",
+#    "push":"https://w3gram-test.herokuapp.com/push/1.my-tablet.WMF5TISqRYYkUr5GJWunmP40FvXI1yU_Qb5kXc907TY",
+#    "route":"https://w3gram-test.herokuapp.com/route/1.my-tablet.HwVTM_07vSbHzrQHCBeHeLygUuvm5esJa2yzOjwmJwQ"
 # }
 ```
 
@@ -75,9 +75,8 @@ curl -i -X POST -H 'Content-Type: application/json' \
 Do the routing step.
 
 ```bash
-curl -i -X POST -H 'Content-Type: application/json' \
-    -d '{"app": "uUJPS3zgIpQjDnxn", "device": "my-tablet", "receiver": "1.my-tablet.WMF5TISqRYYkUr5GJWunmP40FvXI1yU_Qb5kXc907TY", "token": "EVwwWmwiIfLbTDV8OWsHVc4r_p2WUpKXIJcXCdtoFxM"}' \
-    https://w3gram-test.herokuapp.com/route
+curl -i -X POST -H 'Content-Type: application/json' -d '{}' \
+    https://w3gram-test.herokuapp.com/route/1.my-tablet.WMF5TISqRYYkUr5GJWunmP40FvXI1yU_Qb5kXc907TY
 
 # Response example:
 # {

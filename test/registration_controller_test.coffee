@@ -79,9 +79,12 @@ describe 'HTTP server', ->
         expect(response.headers['content-type']).to.equal(
             'application/json; charset=utf-8')
         json = JSON.parse body
+        listenerId = @app.listenerId 'tablet-device-id'
         receiverId = @app.receiverId 'tablet-device-id'
-        expect(json.receiver).to.equal receiverId
-        expect(json.push).to.equal 'http://w3gram.server.com:8080/push'
+        expect(json.push).to.equal(
+            "http://w3gram.server.com:8080/push/#{receiverId}")
+        expect(json.route).to.equal(
+            "http://w3gram.server.com:8080/route/#{listenerId}")
         done()
 
     it 'processes a correct CORS registration', (done) ->
@@ -93,9 +96,12 @@ describe 'HTTP server', ->
         expect(response.headers['content-type']).to.equal(
             'application/json; charset=utf-8')
         json = JSON.parse body
+        listenerId = @app.listenerId 'tablet-device-id'
         receiverId = @app.receiverId 'tablet-device-id'
-        expect(json.receiver).to.equal receiverId
-        expect(json.push).to.equal 'http://w3gram.server.com:8080/push'
+        expect(json.push).to.equal(
+            "http://w3gram.server.com:8080/push/#{receiverId}")
+        expect(json.route).to.equal(
+            "http://w3gram.server.com:8080/route/#{listenerId}")
         done()
 
     it 'rejects a CORS registration from an unauthorized origin', (done) ->
@@ -191,6 +197,3 @@ describe 'HTTP server', ->
         json = JSON.parse body
         expect(json.error).to.equal 'Database error'
         done()
-
-
-

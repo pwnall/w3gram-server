@@ -13,8 +13,8 @@ class PushController
     @_appCache = appCache
     @_switchBox = switchBox
 
-    @_app.post '/push', (request, response) =>
-      receiverId = request.body.receiver
+    @_app.post '/push/:receiver', (request, response) =>
+      receiverId = request.params.receiver
       message = request.body.message
       if typeof receiverId isnt 'string'
         response.status(400).json error: 'Missing receiver ID'
@@ -46,4 +46,3 @@ class PushController
 
 
 module.exports = PushController
-

@@ -38,9 +38,11 @@ class RegistrationController
           response.status(400).json error: 'Invalid token'
           return
 
-        receiverId = app.receiverId deviceId
-        pushUrl = request.protocol + '://' + request.headers['host'] + '/push'
-        response.status(200).json receiver: receiverId, push: pushUrl
+        pushUrl = request.protocol + '://' + request.headers['host'] +
+            '/push/' + app.receiverId(deviceId)
+        routeUrl = request.protocol + '://' + request.headers['host'] +
+            '/route/' + app.listenerId(deviceId)
+        response.status(200).json push: pushUrl, route: routeUrl
         return
       return
     return
