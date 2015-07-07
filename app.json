@@ -8,7 +8,6 @@
     "heroku-postgresql:hobby-dev",
     "librato:development",
     "logentries:tryit",
-    "nodetime:free",
     "papertrail:choklad",
     "rediscloud:25"
   ],

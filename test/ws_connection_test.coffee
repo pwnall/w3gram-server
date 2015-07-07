@@ -70,7 +70,7 @@ describe 'WebSockets server', ->
       expect('Server should not accept connection').to.equal false
       done()
     ws.onerror = (error) ->
-      expect(error).to.be.an 'object'
+      expect(error).to.be.an 'error'
       expect(error.message).to.equal 'unexpected server response (403)'
       ws.close()
       done()
@@ -81,7 +81,7 @@ describe 'WebSockets server', ->
       expect('Server should not accept connection').to.equal false
       done()
     ws.onerror = (error) ->
-      expect(error).to.be.an 'object'
+      expect(error).to.be.an 'error'
       expect(error.message).to.equal 'unexpected server response (400)'
       ws.close()
       done()
@@ -92,7 +92,7 @@ describe 'WebSockets server', ->
       expect('Server should not accept connection').to.equal false
       done()
     ws.onerror = (error) ->
-      expect(error).to.be.an 'object'
+      expect(error).to.be.an 'error'
       expect(error.message).to.equal 'unexpected server response (400)'
       ws.close()
       done()
@@ -104,7 +104,7 @@ describe 'WebSockets server', ->
       expect('Server should not accept connection').to.equal false
       done()
     ws.onerror = (error) ->
-      expect(error).to.be.an 'object'
+      expect(error).to.be.an 'error'
       expect(error.message).to.equal 'unexpected server response (500)'
       ws.close()
       done()
