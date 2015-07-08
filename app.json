@@ -7,9 +7,9 @@
   "addons": [
     "heroku-postgresql:hobby-dev",
     "librato:development",
-    "logentries:tryit",
+    "logentries:le_tryit",
     "papertrail:choklad",
-    "rediscloud:25"
+    "rediscloud:30"
   ],
   "env": {
     "BUILDPACK_URL": "https://github.com/heroku/heroku-buildpack-nodejs",
