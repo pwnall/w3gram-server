@@ -167,12 +167,16 @@ or another untrusted device) should never receive the secret.
 The receiver API is used by notification receivers, which usually run on
 untrusted devices, such as the application users' Web browsers.
 
-### Register a Device
+
+### Device IDs
 
 The application server must assign a unique device ID to each user device that
-requires notifications. In order to manage load, the push notification server
-may (and should) terminate old connections associated with the same API key and
-device ID as an incoming connection.
+requires notifications. The application developer is free to build device IDs
+using any method, subject to the constraint that each device ID must only use
+the characters in the
+[URL-safe base64 encoding in RFC 4648](http://tools.ietf.org/html/rfc4648#section-5).
+
+### Register a Device
 
 To prevent against unauthorized use, the application server must use its secret
 to sign the device ID. This limits a leeching application developer to using

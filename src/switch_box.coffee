@@ -3,17 +3,25 @@ class SwitchBox
   # Creates a switch box with no connections.
   constructor: ->
     @_hash = []
+    @_nextSerial = 0
 
   # Called when a new WebSocket connection is made.
   #
   # @param {WsConnection} wsConnection the new connection
   # @return undefined
   addConnection: (wsConnection) ->
-    hashKey = wsConnection.hashKey()
-    if hashKey of @_hash
-      oldConnection = @_hash[hashKey]
-      oldConnection.closeOnDuplicateConnection()
-    @_hash[hashKey] = wsConnection
+    receiverHash = wsConnection.receiverHash()
+
+    if wsConnection.switchBoxSerial isnt null
+      throw new Error("Connection already added to a SwitchBox")
+
+    serial = @_nextSerial
+    @_nextSerial += 1
+    wsConnection.switchBoxSerial = serial
+
+    receivers = @_hash[receiverHash] ||= { length: 0 }
+    receivers[serial] = wsConnection
+    receivers.length += 1
     return
 
   # Called when a WebSocket connection is closed.
@@ -21,24 +29,35 @@ class SwitchBox
   # @param {WsConnection} wsConnection the closed connection
   # @return undefined
   removeConnection: (wsConnection) ->
-    hashKey = wsConnection.hashKey()
-    if @_hash[hashKey] is wsConnection
-      delete @_hash[hashKey]
+    receiverHash = wsConnection.receiverHash()
+    receivers = @_hash[receiverHash]
+
+    serial = wsConnection.switchBoxSerial
+    return if serial is null
+    return unless serial of receivers
+    wsConnection.switchBoxSerial = null
+
+    delete receivers[serial]
+    receivers.length -= 1
+    if receivers.length is 0
+      delete @_hash[receiverHash]
     return
 
   # Routes a notification to the appropriate WebSocket connection.
   #
-  # @param {String} hashKey the connection's hash key, as provided by
+  # @param {String} receiverHash the connection's hash key, as provided by
   #   {AppCache.decodeReceiverId}
   # @param {Object} the JSON notification body
   # @return undefined
-  pushNotification: (hashKey, data, callback) ->
-    wsConnection = @_hash[hashKey]
-    unless wsConnection
+  pushNotification: (receiverHash, data, callback) ->
+    unless receivers = @_hash[receiverHash]
       callback null
       return
 
-    wsConnection.pushNotification data
+    for serial, wsConnection of receivers
+      continue if serial is 'length'
+      wsConnection.pushNotification data
+
     callback null
     return
 

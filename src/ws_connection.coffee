@@ -2,6 +2,9 @@ Server = {}
 
 # Handles a WebSocket connection.
 class Server.WsConnection
+  # Field used by the switch box to track connections.
+  switchBoxSerial: null
+
   # Sets up the handler for a connection.
   #
   # @param {SwitchBox} switchBox used to route push notification requests to
@@ -13,11 +16,12 @@ class Server.WsConnection
     @_switchBox = switchBox
     @_ws = webSocket
 
+    @switchBoxSerial = null
     @_closed = false
 
     verifyInfo = webSocket.upgradeReq.w3gramInfo
     unless verifyInfo and @_app = verifyInfo.app and
-                          @_hashKey = verifyInfo.hashKey
+                          @_receiverHash = verifyInfo.receiverHash
       throw new Error('Incompatible ws implementation change. ' +
                       'Please file a bug including your ws version.')
 
@@ -43,7 +47,7 @@ class Server.WsConnection
       callback false, 400
       return
     listenerId = url.substring 4
-    appCache.decodeListenerId listenerId, (error, app, hashKey) ->
+    appCache.decodeListenerId listenerId, (error, app, receiverHash) ->
       if error
         callback false, 500
         return
@@ -51,7 +55,7 @@ class Server.WsConnection
         callback false, 400
         return
       if app.acceptsOrigin upgradeRequest.headers['origin']
-        upgradeRequest.w3gramInfo = { app: app, hashKey: hashKey }
+        upgradeRequest.w3gramInfo = { app: app, receiverHash: receiverHash }
         callback true
       else
         callback false, 403
@@ -73,8 +77,8 @@ class Server.WsConnection
 
   # @return {String} the hash key for the connection's receiver, as produced by
   #   {AppCache#decodeListenerId}
-  hashKey: ->
-    @_hashKey
+  receiverHash: ->
+    @_receiverHash
 
   # Closes the underlying WebSocket.
   _close: (code, reason) ->

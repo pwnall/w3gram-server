@@ -185,21 +185,6 @@ describe 'WebSockets server', ->
           expect(event.reason).to.equal 'Invalid request type'
           done()
 
-  it 'closes with 4409 on new device connection', (done) ->
-    ws = new WebSocket @wsUrl, headers: @wsHeaders
-    gotPong = false
-    ws.onopen = =>
-      ws2 = new WebSocket @wsUrl, headers: @wsHeaders
-      gotWsClose = false
-      ws.onclose = (event) ->
-        gotWsClose = true
-        expect(event.code).to.equal 4409
-        expect(event.reason).to.equal 'Device reconnected'
-        ws2.close 1000
-      ws2.on 'close', (event) ->
-        expect(gotWsClose).to.equal true
-        done()
-
   it 'delivers a push notification', (done) ->
     ws = new WebSocket @wsUrl, headers: @wsHeaders
     gotMessage = false
@@ -250,3 +235,71 @@ describe 'WebSockets server', ->
         expect(event.code).to.equal 1000
         expect(event.reason).to.equal ''
         done2()
+
+
+  it 'delivers a push notification to five clients', (done) ->
+    wss = [
+      new WebSocket(@wsUrl, headers: @wsHeaders),
+      new WebSocket(@wsUrl, headers: @wsHeaders),
+      new WebSocket(@wsUrl, headers: @wsHeaders),
+      new WebSocket(@wsUrl, headers: @wsHeaders),
+      new WebSocket(@wsUrl, headers: @wsHeaders),
+    ]
+    doneFlags = [
+      [false, false, false, false, false],
+      [false, false, false, false, false]
+    ]
+
+    readyToPost = (i) =>
+      expect(doneFlags[0][i]).to.equal false
+      doneFlags[0][i] = true
+      for flag in doneFlags[0]
+        return if flag is false
+
+      postOptions =
+        url: "#{@httpRoot}/push/#{@receiverId}"
+        headers:
+          'content-type': 'application/json; charset=utf-8'
+        body: JSON.stringify(
+          message: { text: 'This is a push notification' })
+      request.post postOptions, (error, response, body) =>
+        expect(error).not.to.be.ok
+        expect(response.statusCode).to.equal 204
+        expect(response.headers['access-control-allow-origin']).to.equal '*'
+        expect(body).to.equal ''
+
+    done2 = (i) ->
+      expect(doneFlags[1][i]).to.equal false
+      doneFlags[1][i] = true
+      for flag in doneFlags[1]
+        return if flag is false
+      done()
+
+    for ws, i in wss
+      do (ws, i) =>
+        gotHello = false
+        gotMessage = false
+        ws.onmessage = (event) =>
+          expect(gotHello).to.equal false
+          gotHello = true
+          expect(event.data).to.be.a 'string'
+          json = JSON.parse event.data
+          expect(json.type).to.equal 'hi'
+          expect(json.data).to.be.a 'object'
+          expect(json.data.version).to.equal 0
+          readyToPost i
+
+          ws.onmessage = (event) ->
+            expect(gotMessage).to.equal false
+            gotMessage = true
+            expect(event.data).to.be.a 'string'
+            json = JSON.parse event.data
+            expect(json).to.deep.equal(
+                type: 'note', data: { text: 'This is a push notification' })
+            ws.close 1000
+
+          ws.onclose = (event) ->
+            expect(gotMessage).to.equal true
+            expect(event.code).to.equal 1000
+            expect(event.reason).to.equal ''
+            done2 i
