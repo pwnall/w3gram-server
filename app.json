@@ -7,7 +7,6 @@
   "addons": [
     "heroku-postgresql:hobby-dev",
     "librato:development",
-    "logentries:le_tryit",
     "papertrail:choklad",
     "rediscloud:30"
   ],
