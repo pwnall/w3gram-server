@@ -110,10 +110,27 @@ createdb w3gram_test
 createdb w3gram_dev
 ```
 
-Run the server in developmentm mode.
+Run the server in development mode.
 
 ```bash
-npm start
+PORT=3100 npm start
+```
+
+For development, it can be handy to create an application whose key and secret
+matches pre-defined values.
+
+```bash
+curl -i -X POST -H 'Content-Type: application/json' \
+  -d '{"mak": "dev-mak", "app": { "name": "Testing", "origin": "*", "key": "fixed-key", "secret": "fixed-secret" }}' \
+  http://localhost:3100/apps
+
+# Response example:
+# {
+#    "key":"fixed-key",
+#    "secret":"fixed-secret",
+#    "origin":"*",
+#    "name":"Testing"
+# }
 ```
 
 
