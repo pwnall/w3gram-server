@@ -43,7 +43,10 @@ class AppsController
           return
         @_appList.create appParams, (error, app) =>
           if error isnt null
-            response.status(500).json error: 'Database error'
+            if error.httpStatus
+              response.status(error.httpStatus).json error: error.message
+            else
+              response.status(500).json error: 'Database error'
             return
           response.status(201).json app.json()
         return

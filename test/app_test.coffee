@@ -30,6 +30,52 @@ describe 'App', ->
     it 'accepts IDs with digits, letters, and - _', ->
       expect(App.isValidDeviceId('0129abczABCZ-_')).to.equal true
 
+  describe '.isValidAppKey', ->
+    it 'rejects long app keys', ->
+      appKey = (new Array(26)).join 'a'
+      expect(appKey.length).to.equal 25
+      expect(App.isValidAppKey(appKey)).to.equal false
+
+    it 'rejects empty app keys', ->
+      expect(App.isValidAppKey('')).to.equal false
+
+    it 'rejects app keys with invalid characters', ->
+      expect(App.isValidAppKey('invalid appkey')).to.equal false
+      expect(App.isValidAppKey('invalid@appkey')).to.equal false
+      expect(App.isValidAppKey('invalid.appkey')).to.equal false
+      expect(App.isValidAppKey('invalid+appkey')).to.equal false
+
+    it 'accepts 24-byte keys', ->
+      appKey = (new Array(25)).join 'a'
+      expect(appKey.length).to.equal 24
+      expect(App.isValidAppKey(appKey)).to.equal true
+
+    it 'accepts keys with digits, letters, and - _', ->
+      expect(App.isValidAppKey('0129abczABCZ-_')).to.equal true
+
+  describe '.isValidAppSecret', ->
+    it 'rejects long app secrets', ->
+      appSecret = (new Array(50)).join 'a'
+      expect(appSecret.length).to.equal 49
+      expect(App.isValidAppSecret(appSecret)).to.equal false
+
+    it 'rejects empty app secrets', ->
+      expect(App.isValidAppSecret('')).to.equal false
+
+    it 'rejects app secrets with invalid characters', ->
+      expect(App.isValidAppSecret('invalid appsecret')).to.equal false
+      expect(App.isValidAppSecret('invalid@appsecret')).to.equal false
+      expect(App.isValidAppSecret('invalid.appsecret')).to.equal false
+      expect(App.isValidAppSecret('invalid+appsecret')).to.equal false
+
+    it 'accepts 48-byte secrets', ->
+      appSecret = (new Array(49)).join 'a'
+      expect(appSecret.length).to.equal 48
+      expect(App.isValidAppSecret(appSecret)).to.equal true
+
+    it 'accepts secrets with digits, letters, and - _', ->
+      expect(App.isValidAppSecret('0129abczABCZ-_')).to.equal true
+
   describe '._hmac', ->
     it 'works on the RFC 4231 test case 2', ->
       expect(App._hmac('Jefe', 'what do ya want for nothing?')).to.equal(

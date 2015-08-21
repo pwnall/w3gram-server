@@ -34,6 +34,22 @@ class AppList
         callback error
         return
       [key, idKey, secret] = values
+      if 'key' of options
+        if AppList.App.isValidAppKey options.key
+          key = options.key
+        else
+          error = new Error("Invalid app key")
+          error.httpStatus = 400
+          callback error
+          return
+      if 'secret' of options
+        if AppList.App.isValidAppSecret options.secret
+          secret = options.secret
+        else
+          error = new Error("Invalid app secret")
+          error.httpStatus = 400
+          callback error
+          return
       @_pool.query 'INSERT INTO apps (id,key,idkey,secret,origin,name) ' +
             'VALUES (DEFAULT,$1,$2,$3,$4,$5) RETURNING id;',
             [key, idKey, secret, origin, name], (error, result) ->

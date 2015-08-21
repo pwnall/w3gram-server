@@ -130,6 +130,25 @@ describe 'HTTP server', ->
         expect(json.secret.length).to.be.at.least 32
         done()
 
+    it 'uses the key and secret in params when provided', (done) ->
+      @postOptions.body = JSON.stringify(
+          mak: @mak,
+          app: {
+            name: 'Post App Name', origin: 'postapp.com:8080',
+            key: 'a-test-key', secret: 'a-test-secret' })
+      request.post @postOptions, (error, response, body) =>
+        expect(error).not.to.be.ok
+        expect(response.statusCode).to.equal 201
+        expect(response.headers['access-control-allow-origin']).to.equal '*'
+        expect(response.headers['content-type']).to.equal(
+            'application/json; charset=utf-8')
+        json = JSON.parse body
+        expect(json.name).to.equal 'Post App Name'
+        expect(json.origin).to.equal 'postapp.com:8080'
+        expect(json.key).to.equal 'a-test-key'
+        expect(json.secret).to.equal 'a-test-secret'
+        done()
+
     it '403s if mak is missing', (done) ->
       @postOptions.body = JSON.stringify(
         app: { name: 'Post App Name', origin: 'postapp.com:8080' })
@@ -189,6 +208,38 @@ describe 'HTTP server', ->
             'application/json; charset=utf-8')
         json = JSON.parse body
         expect(json.error).to.equal 'Missing app property'
+        done()
+
+    it '400s if app.key is invalid', (done) ->
+      @postOptions.body = JSON.stringify(
+          mak: @mak,
+          app: {
+            name: 'Post App Name', origin: 'postapp.com:8080',
+            key: 'an invalid key', secret: 'a-test-secret' })
+      request.post @postOptions, (error, response, body) =>
+        expect(error).not.to.be.ok
+        expect(response.statusCode).to.equal 400
+        expect(response.headers['access-control-allow-origin']).to.equal '*'
+        expect(response.headers['content-type']).to.equal(
+            'application/json; charset=utf-8')
+        json = JSON.parse body
+        expect(json.error).to.equal 'Invalid app key'
+        done()
+
+    it '400s if app.secret is invalid', (done) ->
+      @postOptions.body = JSON.stringify(
+          mak: @mak,
+          app: {
+            name: 'Post App Name', origin: 'postapp.com:8080',
+            key: 'a-test-key', secret: 'an invalid secret' })
+      request.post @postOptions, (error, response, body) =>
+        expect(error).not.to.be.ok
+        expect(response.statusCode).to.equal 400
+        expect(response.headers['access-control-allow-origin']).to.equal '*'
+        expect(response.headers['content-type']).to.equal(
+            'application/json; charset=utf-8')
+        json = JSON.parse body
+        expect(json.error).to.equal 'Invalid app secret'
         done()
 
     it '500s on AppCache#getMak errors', (done) ->

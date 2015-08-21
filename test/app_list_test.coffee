@@ -71,6 +71,22 @@ describe 'AppList', ->
         expect(app.id).to.be.a 'number'
         done()
 
+    it 'uses a provided key and secret', (done) ->
+      options =
+          name: 'webogram-prod', origin: 'https://test.app.com'
+          key: 'a-test-key', secret: 'a-test-secret'
+      @appList.create options, (error, app) ->
+        expect(error).to.equal null
+        expect(app).to.be.an.instanceOf AppList.App
+        expect(app.name).to.equal 'webogram-prod'
+        expect(app.origin).to.equal 'https://test.app.com'
+        expect(app.key).to.equal 'a-test-key'
+        expect(app.idKey).to.be.a 'string'
+        expect(app.idKey.length).to.be.at.least 16
+        expect(app.secret).to.equal 'a-test-secret'
+        expect(app.id).to.be.a 'number'
+        done()
+
   describe '#findByKey', ->
     beforeEach (done) ->
       @appList.create name: 'get-test', (error, app) =>

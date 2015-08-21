@@ -102,6 +102,24 @@ class AppList.App
     return false unless deviceId.length <= 64
     /^[A-Za-z0-9_\-]+$/.test deviceId
 
+  # Checks if a string is a valid app key.
+  #
+  # @param {String} appKey the string to be checked
+  # @return {Boolean} true if the argument is a valid app key, false
+  #   otherwise
+  @isValidAppKey: (appKey) ->
+    return false unless appKey.length <= 24
+    /^[A-Za-z0-9_\-]+$/.test appKey
+
+  # Checks if a string is a valid app key.
+  #
+  # @param {String} appKey the string to be checked
+  # @return {Boolean} true if the argument is a valid app secret, false
+  #   otherwise
+  @isValidAppSecret: (appSecret) ->
+    return false unless appSecret.length <= 48
+    /^[A-Za-z0-9_\-]+$/.test appSecret
+
   # Computes a URL-safe base64-encoded SHA-256 HMAC.
   #
   # @param {String} key the HMAC key
