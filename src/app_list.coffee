@@ -34,22 +34,18 @@ class AppList
         callback error
         return
       [key, idKey, secret] = values
-      AppList._urlSafeRandom 32, (error, secret) =>
-        if error
-          callback error
-          return
-        @_pool.query 'INSERT INTO apps (id,key,idkey,secret,origin,name) ' +
-              'VALUES (DEFAULT,$1,$2,$3,$4,$5) RETURNING id;',
-              [key, idKey, secret, origin, name], (error, result) ->
-                if error
-                  callback error
-                  return
-                id = result.rows[0].id
-                app = new AppList.App(
-                    id: id, key: key, idKey: idKey, secret: secret,
-                    origin: origin, name: name)
-                callback null, app
+      @_pool.query 'INSERT INTO apps (id,key,idkey,secret,origin,name) ' +
+            'VALUES (DEFAULT,$1,$2,$3,$4,$5) RETURNING id;',
+            [key, idKey, secret, origin, name], (error, result) ->
+              if error
+                callback error
                 return
+              id = result.rows[0].id
+              app = new AppList.App(
+                  id: id, key: key, idKey: idKey, secret: secret,
+                  origin: origin, name: name)
+              callback null, app
+              return
     return
 
   # Retrieves an app.
