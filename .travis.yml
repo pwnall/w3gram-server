@@ -3,17 +3,18 @@ sudo: false
 node_js:
   - "4"
   - "5"
-compiler: clang-3.6
+  - "6"
+compiler: clang-3.7
 env:
-  - CXX=clang-3.6
+  - CXX=clang-3.7
 addons:
   apt:
     sources:
-      - llvm-toolchain-precise-3.6
+      - llvm-toolchain-precise-3.7
       - ubuntu-toolchain-r-test
     packages:
-      - clang-3.6
-      - g++-4.8
+      - clang-3.7
+      - g++-4.9
   postgresql: "9.4"
 before_script:
   - psql -c 'create database w3gram_test;' -U postgres

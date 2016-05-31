@@ -20,7 +20,7 @@ class Server
   # @param {Object} options server configuration
   # @option options {String} port the port to bind to
   constructor: (appList, appCache, switchBox, options) ->
-    @_port = parseInt options.port
+    @_port = parseInt(options.port) or 0
     @_address = null
 
     @_switchBox = switchBox
@@ -71,8 +71,9 @@ class Server
     unless @_address
       throw new Error 'Not listening'
     @_address = null
-    @_ws.close()
-    @_http.close callback
+    @_ws.close (wsError) =>
+      @_http.close (httpError)->
+        callback wsError or httpError
     return
 
   # This server's HTTP URL.
