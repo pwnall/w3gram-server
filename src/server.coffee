@@ -105,8 +105,8 @@ class Server
   #
   # @param {ws.WebSocket} webSocket the WebSocket connection
   # @return undefined
-  _onWsConnection: (webSocket) ->
-    new Server.WsConnection @_switchBox, webSocket
+  _onWsConnection: (webSocket, upgradeRequest) ->
+    new Server.WsConnection @_switchBox, webSocket, webSocket.upgradeReq
 
 Server.WsConnection = require './ws_connection.coffee'
 

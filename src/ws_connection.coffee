@@ -10,16 +10,16 @@ class Server.WsConnection
   # @param {SwitchBox} switchBox used to route push notification requests to
   #   this WebSocket connection
   # @param {ws.WebSocket} webSocket the WebSocket connection
-  # @param {AppCache} appCache the cache for the list of applications that
-  #   are allowed to use connections
-  constructor: (switchBox, webSocket) ->
+  # @param {http.Request} upgradeRequest must be the same object that is pointed
+  #   to by info.req in {.verifyClient}
+  constructor: (switchBox, webSocket, upgradeRequest) ->
     @_switchBox = switchBox
     @_ws = webSocket
 
     @switchBoxSerial = null
     @_closed = false
 
-    verifyInfo = webSocket.upgradeReq.w3gramInfo
+    verifyInfo = upgradeRequest.w3gramInfo
     unless verifyInfo and @_app = verifyInfo.app and
                           @_receiverHash = verifyInfo.receiverHash
       throw new Error('Incompatible ws implementation change. ' +
