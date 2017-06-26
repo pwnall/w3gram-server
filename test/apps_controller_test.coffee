@@ -265,4 +265,3 @@ describe 'HTTP server', ->
         json = JSON.parse body
         expect(json.error).to.equal 'Database error'
         done()
-

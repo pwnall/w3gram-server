@@ -34,7 +34,7 @@ describe 'WebSockets server', ->
         @listenerId = app.listenerId 'tablet-device-id'
         @receiverId = app.receiverId 'tablet-device-id'
         @wsUrl = "#{@server.wsUrl()}/ws/#{@listenerId}"
-        @wsHeaders = { origin: 'https://test.app.com' }
+        @wsOrigin = 'https://test.app.com'
         done()
 
   afterEach (done) ->
@@ -47,7 +47,7 @@ describe 'WebSockets server', ->
       done()
 
   it 'accepts a valid CORS connection', (done) ->
-    ws = new WebSocket @wsUrl, headers: @wsHeaders
+    ws = new WebSocket @wsUrl, origin: @wsOrigin
     ws.onopen = ->
       gotHello = false
       ws.onmessage = (event) ->
@@ -58,14 +58,14 @@ describe 'WebSockets server', ->
         expect(json.type).to.equal 'hi'
         expect(json.data).to.be.a 'object'
         expect(json.data.version).to.equal 0
-        ws.close 1000
         ws.onclose = (event) ->
           expect(event.code).to.equal 1000
           expect(event.reason).to.equal ''
           done()
+        ws.close 1000
 
   it '403s a CORS connection from an unauthorized origin', (done) ->
-    ws = new WebSocket @wsUrl, headers: { origin: 'https://evil.app.com' }
+    ws = new WebSocket @wsUrl, origin: 'https://evil.app.com'
     ws.onopen = ->
       expect('Server should not accept connection').to.equal false
       done()
@@ -110,7 +110,7 @@ describe 'WebSockets server', ->
       done()
 
   it 'responds with a pong to a ping request', (done) ->
-    ws = new WebSocket @wsUrl, headers: @wsHeaders
+    ws = new WebSocket @wsUrl, origin: @wsOrigin
     ws.onopen = ->
       ws.send JSON.stringify(type: 'ping', data: { ts: 42 })
 
@@ -139,7 +139,7 @@ describe 'WebSockets server', ->
           done()
 
   it 'closes with 4400 on a non-JSON request', (done) ->
-    ws = new WebSocket @wsUrl, headers: @wsHeaders
+    ws = new WebSocket @wsUrl, origin: @wsOrigin
     ws.onopen = ->
 
       gotHello = false
@@ -163,7 +163,7 @@ describe 'WebSockets server', ->
           done()
 
   it 'closes with 4404 on invalid request type', (done) ->
-    ws = new WebSocket @wsUrl, headers: @wsHeaders
+    ws = new WebSocket @wsUrl, origin: @wsOrigin
     ws.onopen = ->
       gotHello = false
       ws.onmessage = (event) ->
@@ -186,7 +186,7 @@ describe 'WebSockets server', ->
           done()
 
   it 'delivers a push notification', (done) ->
-    ws = new WebSocket @wsUrl, headers: @wsHeaders
+    ws = new WebSocket @wsUrl, origin: @wsOrigin
     gotMessage = false
     doneFlags = [false, false]
     done1 = ->
@@ -239,11 +239,11 @@ describe 'WebSockets server', ->
 
   it 'delivers a push notification to five clients', (done) ->
     wss = [
-      new WebSocket(@wsUrl, headers: @wsHeaders),
-      new WebSocket(@wsUrl, headers: @wsHeaders),
-      new WebSocket(@wsUrl, headers: @wsHeaders),
-      new WebSocket(@wsUrl, headers: @wsHeaders),
-      new WebSocket(@wsUrl, headers: @wsHeaders),
+      new WebSocket(@wsUrl, origin: @wsOrigin),
+      new WebSocket(@wsUrl, origin: @wsOrigin),
+      new WebSocket(@wsUrl, origin: @wsOrigin),
+      new WebSocket(@wsUrl, origin: @wsOrigin),
+      new WebSocket(@wsUrl, origin: @wsOrigin),
     ]
     doneFlags = [
       [false, false, false, false, false],

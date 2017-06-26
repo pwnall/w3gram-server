@@ -467,4 +467,3 @@ describe 'AppCache', ->
         expect(error).to.equal @errorObject
         expect(@mockList.findByIdCallCount).to.equal 1
         done()
-

@@ -23,6 +23,7 @@ class Server
     @_port = parseInt(options.port) or 0
     @_address = null
 
+    @_appCache = appCache
     @_switchBox = switchBox
 
     @_app = express()
@@ -42,12 +43,7 @@ class Server
     new AppsController @_app, appList, appCache
 
     @_http = http.createServer @_app
-    @_ws = new ws.Server(
-      server: @_http,
-      verifyClient: (info, callback) ->
-        Server.WsConnection.verifyClient appCache, info, callback
-    )
-    @_ws.on 'connection', @_onWsConnection.bind(@)
+    @_ws = null
 
   # Starts listening to the server's socket.
   #
@@ -55,8 +51,16 @@ class Server
   #   incoming connections
   # @return undefined
   listen: (callback) ->
-    if @_address
+    if @_address isnt null or @_ws isnt null
       throw new Error 'Already listening'
+
+    @_ws = new ws.Server(
+      server: @_http,
+      verifyClient: (info, callback) =>
+        Server.WsConnection.verifyClient @_appCache, info, callback
+    )
+    @_ws.on 'connection', @_onWsConnection.bind(@)
+
     @_http.listen @_port, =>
       @_address = @_http.address()
       callback()
@@ -68,10 +72,11 @@ class Server
   #   socket
   # @return undefined
   close: (callback) ->
-    unless @_address
+    if @_address is null or @_ws is null
       throw new Error 'Not listening'
     @_address = null
     @_ws.close (wsError) =>
+      @_ws = null
       @_http.close (httpError)->
         callback wsError or httpError
     return
@@ -106,7 +111,7 @@ class Server
   # @param {ws.WebSocket} webSocket the WebSocket connection
   # @return undefined
   _onWsConnection: (webSocket, upgradeRequest) ->
-    new Server.WsConnection @_switchBox, webSocket, webSocket.upgradeReq
+    new Server.WsConnection @_switchBox, webSocket, upgradeRequest
 
 Server.WsConnection = require './ws_connection.coffee'
 
