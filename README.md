@@ -10,7 +10,7 @@ This is a [node.js](http://nodejs.org/) server for the
 
 The server was designed to be deployed to [Heroku](https://www.heroku.com/)
 using free resources, so it fits in a single dyno. The code has great test
-coverage using [mocha](http://visionmedia.github.io/mocha/).
+coverage using [mocha](http://mochajs.org/).
 
 
 ## Easy Setup
