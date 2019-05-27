@@ -1,6 +1,6 @@
 {
   "name": "w3gram-server",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "W3gram Push Notification Server",
   "keywords": [
     "push",
