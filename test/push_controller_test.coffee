@@ -20,7 +20,6 @@ describe 'HTTP server', ->
     @server.close done
 
   beforeEach (done) ->
-    @sandbox = sinon.sandbox.create()
     @appCache.reset()
     @appList.setup (error) ->
       if error
@@ -29,7 +28,7 @@ describe 'HTTP server', ->
       done()
 
   afterEach (done) ->
-    @sandbox.restore()
+    sinon.restore()
     @appCache.reset()
     @appList.teardown (error) ->
       if error
@@ -73,7 +72,7 @@ describe 'HTTP server', ->
           message: { text: 'This is a push notification' })
 
     it 'accepts a correct push request', (done) ->
-      pushNotificationSpy = @sandbox.spy @switchBox, 'pushNotification'
+      pushNotificationSpy = sinon.spy @switchBox, 'pushNotification'
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 204
@@ -83,7 +82,7 @@ describe 'HTTP server', ->
         done()
 
     it 'accepts a correct CORS push request', (done) ->
-      pushNotificationSpy = @sandbox.spy @switchBox, 'pushNotification'
+      pushNotificationSpy = sinon.spy @switchBox, 'pushNotification'
       @postOptions.headers['origin'] = 'https://test.app.com'
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
@@ -94,7 +93,7 @@ describe 'HTTP server', ->
         done()
 
     it 'rejects a CORS push request from an unauthorized origin', (done) ->
-      pushNotificationSpy = @sandbox.spy @switchBox, 'pushNotification'
+      pushNotificationSpy = sinon.spy @switchBox, 'pushNotification'
       @postOptions.headers['origin'] = 'https://hax.app.com'
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
@@ -140,7 +139,7 @@ describe 'HTTP server', ->
         done()
 
     it '500s on AppCachge#decodeReceiverId errors', (done) ->
-      @sandbox.stub(@appCache, 'decodeReceiverId').callsArgWith 1, new Error()
+      sinon.stub(@appCache, 'decodeReceiverId').callsArgWith 1, new Error()
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 500

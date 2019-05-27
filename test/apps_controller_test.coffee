@@ -19,7 +19,6 @@ describe 'HTTP server', ->
     @server.close done
 
   beforeEach (done) ->
-    @sandbox = sinon.sandbox.create()
     @appCache.reset()
     @appList.setup (error) ->
       if error
@@ -28,7 +27,7 @@ describe 'HTTP server', ->
       done()
 
   afterEach (done) ->
-    @sandbox.restore()
+    sinon.restore()
     @appCache.reset()
     @appList.teardown (error) ->
       if error
@@ -60,7 +59,7 @@ describe 'HTTP server', ->
           done()
 
     it '500s on AppCache#hasApps errors', (done) ->
-      @sandbox.stub(@appCache, 'hasApps').callsArgWith 0, new Error()
+      sinon.stub(@appCache, 'hasApps').callsArgWith 0, new Error()
       request.get "#{@httpRoot}/mak", (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 500
@@ -72,7 +71,7 @@ describe 'HTTP server', ->
         done()
 
     it '500s on AppCache#getMak errors', (done) ->
-      @sandbox.stub(@appCache, 'getMak').callsArgWith 0, new Error()
+      sinon.stub(@appCache, 'getMak').callsArgWith 0, new Error()
       request.get "#{@httpRoot}/mak", (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 500
@@ -243,7 +242,7 @@ describe 'HTTP server', ->
         done()
 
     it '500s on AppCache#getMak errors', (done) ->
-      @sandbox.stub(@appCache, 'getMak').callsArgWith 0, new Error()
+      sinon.stub(@appCache, 'getMak').callsArgWith 0, new Error()
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 500
@@ -255,7 +254,7 @@ describe 'HTTP server', ->
         done()
 
     it '500s on AppList#create errors', (done) ->
-      @sandbox.stub(@appList, 'create').callsArgWith 1, new Error()
+      sinon.stub(@appList, 'create').callsArgWith 1, new Error()
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 500

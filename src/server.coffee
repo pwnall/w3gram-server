@@ -77,7 +77,7 @@ class Server
     @_address = null
     @_ws.close (wsError) =>
       @_ws = null
-      @_http.close (httpError)->
+      @_http.close (httpError) ->
         callback wsError or httpError
     return
 

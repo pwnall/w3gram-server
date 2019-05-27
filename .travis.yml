@@ -1,22 +1,11 @@
-sudo: false
-dist: trusty
+dist: xenial
 language: node_js
 
 node_js:
-  - "6"
-  - "8"
-compiler: clang-4
-env:
-  - CXX=clang-4
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-trusty-4.0
-    packages:
-    - g++-6
-    - clang-4.0
-  postgresql: "9.6"
+  - "10"
+  - "12"
+services:
+  - postgresql
 before_script:
   - psql -c 'create database w3gram_test;' -U postgres
 env: DATABASE_URL=postgresql://postgres@localhost/w3gram_test

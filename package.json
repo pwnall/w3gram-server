@@ -18,26 +18,26 @@
     "url": "https://github.com/pwnall/w3gram-server/issues"
   },
   "engines": {
-    "node": "8.x"
+    "node": "12.x"
   },
   "dependencies": {
-    "any-db": ">= 2.2.0",
+    "any-db": ">=2.2.1",
     "any-db-postgres": ">= 2.1.5",
-    "async": ">= 2.5.0",
-    "body-parser": ">= 1.17.2",
-    "coffee-script": ">= 1.12.6",
-    "cors": ">= 2.8.3",
-    "express": ">= 4.15.3",
-    "pg": ">= 6.4.0",
-    "ws": ">= 3.0.0"
+    "async": ">=3.0.1",
+    "body-parser": ">=1.19.0",
+    "coffeescript": ">=2.4.1",
+    "cors": ">=2.8.5",
+    "express": ">=4.17.1",
+    "pg": ">=7.11.0",
+    "ws": ">=7.0.0"
   },
   "devDependencies": {
-    "chai": ">= 4.0.2",
+    "chai": ">=4.2.0",
     "codo": ">= 2.1.2",
-    "mocha": ">= 3.4.2",
-    "request": ">= 2.81.0",
-    "sinon": ">= 2.3.5",
-    "sinon-chai": ">= 2.11.0"
+    "mocha": ">=6.1.4",
+    "request": ">=2.88.0",
+    "sinon": ">=7.3.2",
+    "sinon-chai": ">=3.3.0"
   },
   "main": "lib/index.js",
   "directories": {
@@ -47,6 +47,6 @@
   },
   "scripts": {
     "start": "node lib/boot.js",
-    "test": "node node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register --timeout 5000 --require test/helpers.coffee"
+    "test": "mocha -require coffeescript/register --timeout 5000 --require test/helpers.coffee test/**/*_test.coffee"
   }
 }

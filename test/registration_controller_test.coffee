@@ -19,7 +19,6 @@ describe 'HTTP server', ->
     @server.close done
 
   beforeEach (done) ->
-    @sandbox = sinon.sandbox.create()
     @appCache.reset()
     @appList.setup (error) ->
       if error
@@ -28,7 +27,7 @@ describe 'HTTP server', ->
       done()
 
   afterEach (done) ->
-    @sandbox.restore()
+    sinon.restore
     @appCache.reset()
     @appList.teardown (error) ->
       if error
@@ -187,7 +186,7 @@ describe 'HTTP server', ->
 
 
     it '500s on AppCachge#getAppByKey errors', (done) ->
-      @sandbox.stub(@appCache, 'getAppByKey').callsArgWith 1, new Error()
+      sinon.stub(@appCache, 'getAppByKey').callsArgWith 1, new Error()
       request.post @postOptions, (error, response, body) =>
         expect(error).not.to.be.ok
         expect(response.statusCode).to.equal 500

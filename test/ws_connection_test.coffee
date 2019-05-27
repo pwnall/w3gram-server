@@ -21,7 +21,6 @@ describe 'WebSockets server', ->
     @server.close done
 
   beforeEach (done) ->
-    @sandbox = sinon.sandbox.create()
     @appCache.reset()
     @appList.setup (error) =>
       if error
@@ -38,7 +37,7 @@ describe 'WebSockets server', ->
         done()
 
   afterEach (done) ->
-    @sandbox.restore()
+    sinon.restore()
     @appCache.reset()
     @appList.teardown (error) ->
       if error
@@ -70,8 +69,7 @@ describe 'WebSockets server', ->
       expect('Server should not accept connection').to.equal false
       done()
     ws.onerror = (error) ->
-      expect(error).to.be.an 'error'
-      expect(error.message).to.equal 'unexpected server response (403)'
+      expect(error.message).to.equal 'Unexpected server response: 403'
       ws.close()
       done()
 
@@ -81,8 +79,7 @@ describe 'WebSockets server', ->
       expect('Server should not accept connection').to.equal false
       done()
     ws.onerror = (error) ->
-      expect(error).to.be.an 'error'
-      expect(error.message).to.equal 'unexpected server response (400)'
+      expect(error.message).to.equal 'Unexpected server response: 400'
       ws.close()
       done()
 
@@ -92,20 +89,18 @@ describe 'WebSockets server', ->
       expect('Server should not accept connection').to.equal false
       done()
     ws.onerror = (error) ->
-      expect(error).to.be.an 'error'
-      expect(error.message).to.equal 'unexpected server response (400)'
+      expect(error.message).to.equal 'Unexpected server response: 400'
       ws.close()
       done()
 
   it '500s a connection on database error', (done) ->
-    @sandbox.stub(@appCache, 'getAppById').callsArgWith 1, new Error()
+    sinon.stub(@appCache, 'getAppById').callsArgWith 1, new Error()
     ws = new WebSocket @wsUrl
     ws.onopen = ->
       expect('Server should not accept connection').to.equal false
       done()
     ws.onerror = (error) ->
-      expect(error).to.be.an 'error'
-      expect(error.message).to.equal 'unexpected server response (500)'
+      expect(error.message).to.equal 'Unexpected server response: 500'
       ws.close()
       done()
 
